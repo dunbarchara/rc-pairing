@@ -29,4 +29,5 @@ Stretch Goals (options):
 - Implement shifting NPCs to make it harder
 - Implement interactive NPCs - some conversational phase we have to build, maybe the NPCs make us answer math problems or something
 - Any fun suggestions from the RC Faculty/Alum?
+- Hunger bar/mechanics?
 
