@@ -1,6 +1,8 @@
 
 This is the foundation for the Recurse Center pairing interview
 
+`node game.ts` from the terminal to run
+
 ## game.ts
 
 This is the main file we will edit for game logic
