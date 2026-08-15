@@ -1,3 +1,4 @@
+<img width="522" height="453" alt="Screenshot 2026-08-15 at 03 52 00" src="https://github.com/user-attachments/assets/1b3be10b-32e0-4dcd-b96e-41b94b9f97c8" />
 
 This is the foundation for the Recurse Center pairing interview
 
