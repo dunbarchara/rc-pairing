@@ -32,3 +32,13 @@ Stretch Goals (options):
 - Any fun suggestions from the RC Faculty/Alum?
 - Hunger bar/mechanics?
 
+
+
+GOALS:
+
+1. Implement collision
+2. Spawn Zombies
+3. Make Zombies follow player
+4. Make Zombies eat player if they move to player's space
+5. Add ability to fire gun to kill zombies
+
