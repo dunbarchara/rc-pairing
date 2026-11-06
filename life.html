@@ -1,0 +1,222 @@
+
+
+
+
+<!--
+
+lonelyCells = Set<>
+
+drawCanvas() -> prints canvas
+updateState() -> 
+
+gameLoop() -> sleep, recalc / rerender
+
+getNeighbors() -
+
+
+live cell -> DIE < 2 neighbors
+live cell -> LIVES 2 <= 3 neighbors lives
+live cell -> DIE >= 4 neighbors 
+dead cell -> LIVE exactly 3 neighbors
+
+
+bool[][] true is alive false is dead
+-->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Of Life</title>
+    <style>
+        body {
+            margin: 0;
+            background: #1e1e1e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            border: 2px solid #444;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gridCanvas"></canvas>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        const COLS = 70;          // Number of columns
+        const ROWS = 40;          // Number of rows
+        const CELL_SIZE = 20;     // Size of each cell in pixels
+        const GRID_LINE_COLOR = '#272727';
+
+        // --- 2. GRID DATA ---
+        // Create a 2D array initialized to empty/white cells
+        //const grid = Array(ROWS).fill(null).map(() => Array(COLS).fill('#222222'));
+        const COLOR_LIVE = '#FFE066';
+        const COLOR_DEAD = '#222222';
+        let matrix = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+
+
+        // Seed some random colors for demonstration
+        //grid[0][0] = '#FFE066'; // Red
+        //grid[2][4] = '#F5C242'; // Blue
+        //grid[5][2] = '#A87C1E'; // Green
+
+        /*
+        matrix[0][0] = true; // Red
+        matrix[2][4] = true; // Blue
+        matrix[5][2] = true; // Green
+        matrix[ROWS-1][COLS-1] = true; // Yellow
+*/
+        // --- 3. CANVAS SETUP ---
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Dynamically set canvas size based on config
+        canvas.width = COLS * CELL_SIZE;
+        canvas.height = ROWS * CELL_SIZE;
+
+        const dirs = [
+            [-1, -1],
+            [-1, 0],
+            [-1, 1],
+            
+            [0, -1],
+            [0, 1],
+            
+            [1, -1],
+            [1, 0],
+            [1, 1],
+        ];
+
+        function seedMatrix() {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c <  COLS; c++) {
+                    // 
+                    if (Math.floor(Math.random() * 10) === 1) {
+                        matrix[r][c] = true;
+                    }
+                }
+            }
+        }
+
+
+        function countNeighbors(r, c) {
+            let count = 0;
+
+            for (const [dr, dc] of dirs) {
+                const newR = r + dr;
+                const newC = c + dc;
+                if (newR < 0 || newR >= ROWS || newC < 0 || newC >= COLS) {
+                    continue;
+                }
+
+                // invariant - in bounds
+                if (matrix[newR][newC]) {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        function updateState() {
+            const newState = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c <  COLS; c++) {
+                    const neighbors = countNeighbors(r, c);
+
+                    if (matrix[r][c]) {
+                        // is alive
+                        if (neighbors < 2) {
+                            newState[r][c] = false; // die lonely
+                        } else if (2 <= neighbors && neighbors <= 3) {
+                            // live on
+                            newState[r][c] = true;
+                        } else {
+                            newState[r][c] = false; // die overpopulation
+                        }
+                    } else if (neighbors === 3) {
+                        // dead comes to life
+                        newState[r][c] = true;
+                    }
+                }
+            }
+
+            matrix = newState;
+        }
+
+        // --- 4. RENDER FUNCTION ---
+        function drawGrid() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw cell colors
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+
+                    if (matrix[r][c]) {
+                        ctx.fillStyle = COLOR_LIVE;
+                    } else {
+                        ctx.fillStyle = COLOR_DEAD;
+                    }
+
+                    ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            }
+
+            // Draw gridlines
+            ctx.strokeStyle = GRID_LINE_COLOR;
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let c = 0; c <= COLS; c++) {
+                ctx.beginPath();
+                ctx.moveTo(c * CELL_SIZE, 0);
+                ctx.lineTo(c * CELL_SIZE, canvas.height);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let r = 0; r <= ROWS; r++) {
+                ctx.beginPath();
+                ctx.moveTo(0, r * CELL_SIZE);
+                ctx.lineTo(canvas.width, r * CELL_SIZE);
+                ctx.stroke();
+            }
+        }
+        
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        // --- 6. THE RENDER LOOP ---
+        async function gameLoop() {
+            updateState(); // 1. Calculate state
+            drawGrid();      // 2. Paint state to screen
+            await sleep(400);
+            
+            // 3. Queue up the next frame native to monitor refresh rate
+            gameLoop();
+        }
+        seedMatrix();
+
+        /*
+
+
+
+        */
+
+        drawGrid();
+        // kick off game
+        gameLoop();
+    </script>
+</body>
+</html>

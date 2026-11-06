@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Of Life</title>
+    <style>
+        body {
+            margin: 0;
+            background: #1e1e1e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            border: 2px solid #444;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gridCanvas"></canvas>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        const COLS = 70;          // Number of columns
+        const ROWS = 40;          // Number of rows
+        const CELL_SIZE = 20;     // Size of each cell in pixels
+        const GRID_LINE_COLOR = '#272727';
+
+        // --- 2. GRID DATA ---
+        // Create a 2D array initialized to empty/white cells
+        const grid = Array(ROWS).fill(null).map(() => Array(COLS).fill('#222222'));
+
+        // Seed some random colors for demonstration
+        grid[0][0] = '#FFE066'; // Red
+        grid[2][4] = '#F5C242'; // Blue
+        grid[5][2] = '#A87C1E'; // Green
+        grid[ROWS-1][COLS-1] = '#523B0F'; // Yellow
+
+        // --- 3. CANVAS SETUP ---
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Dynamically set canvas size based on config
+        canvas.width = COLS * CELL_SIZE;
+        canvas.height = ROWS * CELL_SIZE;
+
+        // --- 4. RENDER FUNCTION ---
+        function drawGrid() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw cell colors
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    ctx.fillStyle = grid[r][c];
+                    ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            }
+
+            // Draw gridlines
+            ctx.strokeStyle = GRID_LINE_COLOR;
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let c = 0; c <= COLS; c++) {
+                ctx.beginPath();
+                ctx.moveTo(c * CELL_SIZE, 0);
+                ctx.lineTo(c * CELL_SIZE, canvas.height);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let r = 0; r <= ROWS; r++) {
+                ctx.beginPath();
+                ctx.moveTo(0, r * CELL_SIZE);
+                ctx.lineTo(canvas.width, r * CELL_SIZE);
+                ctx.stroke();
+            }
+        }
+
+        // Run the render
+        drawGrid();
+    </script>
+</body>
+</html>

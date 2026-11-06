@@ -135,6 +135,10 @@ class Game {
 
     }
 
+    doubleZombies() {
+        this.spawnZombies(this.zombiePositions.length);
+    }
+
     spawnZombies(num: number) {
         for (let i = 0; i < num; i++) {
             // for each zombie
@@ -281,8 +285,8 @@ class Game {
 =================================================================================
 */
 
-//const game: Game = new Game(50, 150, 55, 200); // large viewbox (debugging)
-const game: Game = new Game(50, 150, 15, 40); // standard viewbox
+const game: Game = new Game(50, 150, 30, 120); // large viewbox (debugging)
+//const game: Game = new Game(50, 150, 15, 40); // standard viewbox
 
 // init assets
 const assetChurch: Asset = new Asset('./assets/building_church.txt');
@@ -344,6 +348,9 @@ let stepCounter = 0;
 let keyPressed = '';
 let firePhase = false;
 
+let season = 0; // spring summer winter fall 0 1 2 3
+const seasonSteps = 20;
+
 // Helper function to wait for a single keypress
 function waitForKeypress(): Promise<string> {
     return new Promise((resolve) => {
@@ -369,7 +376,30 @@ function waitForKeypress(): Promise<string> {
                     game.tryMoveCharacter(key.name);
                 }
 
-                game.iterateZombies();
+                if ((stepCounter / seasonSteps) % 4 === 1) {
+                    // summer
+                    game.doubleZombies();
+                }
+                switch (Math.floor((stepCounter / seasonSteps) % 4)) {
+                    case 0:
+                        //seas = "Spring: Zombies start moving";
+                        game.iterateZombies();
+                        break;
+                    case 1:
+                        //seas = "Summer: Zombies double";
+                        game.iterateZombies();
+                        break;
+                    case 2:
+                        //seas = "Fall: Zombies move twice as fast";
+                        game.iterateZombies();
+                        game.iterateZombies();
+                        break;
+                    case 3:
+                        //seas = "Winter: Zombies are asleep";
+                        break;
+                    default:
+                        break;
+                }
             }
 
             input.removeListener('keypress', listener);
@@ -385,6 +415,30 @@ function repaintTerminal() {
 
     console.log(`--- ${game.zombiePositions.length} Zombie${game.zombiePositions.length !== 1 ? 's' : ''} Left`);
     console.log(`--- Mode: ${firePhase ? 'Firing Weapon' : 'Walking'}`);
+    console.log(`--- Steps: ${stepCounter}`);
+
+    let seas = "Spring";
+
+    let seasMath = Math.floor((stepCounter / seasonSteps) % 4);
+    console.log(`seasMath ${seasMath}`);
+
+    switch (seasMath) {
+        case 0:
+            seas = "Spring: Zombies start moving";
+            break;
+        case 1:
+            seas = "Summer: Zombies double";
+            break;
+        case 2:
+            seas = "Fall: Zombies move twice as fast";
+            break;
+        case 3:
+            seas = "Winter: Zombies are asleep";
+            break;
+        default:
+            break;
+    }
+    console.log(`--- ${seas}`);
     /*
     console.log(`--- Steps: ${stepCounter} ---`);
     console.log(`--- Key: ${keyPressed} ---`);

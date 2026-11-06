@@ -1,0 +1,10 @@
+
+
+1. implement the game of life mechanics
+2. lonely cell mech (life 10)
+3. 
+
+
+
+
+

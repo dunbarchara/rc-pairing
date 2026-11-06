@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Game of Life</title>
+    <style>
+        body {
+            margin: 0;
+            background: #1e1e1e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+            font-family: sans-serif;
+        }
+        canvas {
+            border: 2px solid #444;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="margin-bottom: 10px;">Conway's Game of Life (60 FPS loop)</div>
+    <canvas id="gridCanvas"></canvas>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        const COLS = 80;          // Grid width
+        const ROWS = 50;          // Grid height
+        const CELL_SIZE = 10;     // Size of each cell in pixels
+        const COLOR_ALIVE = '#2ecc71'; // Green for alive cells
+        const COLOR_DEAD = '#111111';  // Dark charcoal for dead cells
+        const GRID_LINE_COLOR = '#222222';
+
+        // --- 2. CANVAS SETUP ---
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = COLS * CELL_SIZE;
+        canvas.height = ROWS * CELL_SIZE;
+
+        // --- 3. STATE INITIALIZATION ---
+        // Create an empty 2D grid
+        function createGrid() {
+            return Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+        }
+
+        let currentGrid = createGrid();
+        let nextGrid = createGrid();
+
+        // Seed with random initial state (roughly 20% alive)
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                currentGrid[r][c] = Math.random() > 0.8 ? 1 : 0;
+            }
+        }
+
+        // --- 4. GAME LOGIC ---
+        function countNeighbors(grid, row, col) {
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    if (i === 0 && j === 0) continue; // Skip self
+
+                    // Wrap-around edges (Toroidal grid)
+                    const r = (row + i + ROWS) % ROWS;
+                    const c = (col + j + COLS) % COLS;
+                    
+                    count += grid[r][c];
+                }
+            }
+            return count;
+        }
+
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        function updatePhysics() {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const neighbors = countNeighbors(currentGrid, r, c);
+                    const isAlive = currentGrid[r][c] === 1;
+
+                    if (isAlive && (neighbors < 2 || neighbors > 3)) {
+                        nextGrid[r][c] = 0; // Overpopulation / Underpopulation dies
+                    } else if (!isAlive && neighbors === 3) {
+                        nextGrid[r][c] = 1; // Reproduction
+                    } else {
+                        nextGrid[r][c] = currentGrid[r][c]; // Stays the same
+                    }
+                }
+            }
+
+            // Swap buffers rapidly instead of creating new arrays
+            let temp = currentGrid;
+            currentGrid = nextGrid;
+            nextGrid = temp;
+        }
+
+        // --- 5. RENDER FUNCTION ---
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw cells
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    ctx.fillStyle = currentGrid[r][c] === 1 ? COLOR_ALIVE : COLOR_DEAD;
+                    ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            }
+
+            // Draw gridlines
+            ctx.strokeStyle = GRID_LINE_COLOR;
+            ctx.lineWidth = 1;
+            for (let c = 0; c <= COLS; c++) {
+                ctx.beginPath(); ctx.moveTo(c * CELL_SIZE, 0); ctx.lineTo(c * CELL_SIZE, canvas.height); ctx.stroke();
+            }
+            for (let r = 0; r <= ROWS; r++) {
+                ctx.beginPath(); ctx.moveTo(0, r * CELL_SIZE); ctx.lineTo(canvas.width, r * CELL_SIZE); ctx.stroke();
+            }
+        }
+
+        // --- 6. THE RENDER LOOP ---
+        async function gameLoop() {
+            updatePhysics(); // 1. Calculate state
+            drawGrid();      // 2. Paint state to screen
+            await sleep(400);
+            
+            // 3. Queue up the next frame native to monitor refresh rate
+            gameLoop()
+        }
+
+        gameLoop();
+        // Kick off the loop
+    </script>
+</body>
+</html>
